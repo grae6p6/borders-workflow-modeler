@@ -6,7 +6,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      name: workflow-web-modeler
+      name: borders-workflow-modeler
   ingress:
   - from:
     - namespaceSelector:

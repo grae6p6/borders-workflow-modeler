@@ -9,16 +9,16 @@ pipeline:
       branch: master
       event: push
 
-  image_to_artifactory:
+  image_to_quay:
     image: docker:17.09.1
     secrets:
-      - docker_artifactory_password
+      - docker_password
     environment:
       - DOCKER_HOST=tcp://172.17.0.1:2375
     commands:
-      - docker login -u="borders-artifactory" -p=$${DOCKER_ARTIFACTORY_PASSWORD} docker.digital.homeoffice.gov.uk
-      - docker tag workflow-web-modeler docker.digital.homeoffice.gov.uk/ukhomeofficedigital/borders/workflow-web-modeler:$${DRONE_COMMIT_SHA}
-      - docker push docker.digital.homeoffice.gov.uk/ukhomeofficedigital/borders/workflow-web-modeler:$${DRONE_COMMIT_SHA}
+      - docker login -u="ukhomeofficedigital+borders_central" -p=$${DOCKER_PASSWORD} quay.io
+      - docker tag workflow-web-modeler quay.io/ukhomeofficedigital/workflow-web-modeler:$${DRONE_COMMIT_SHA}
+      - docker push quay.io/ukhomeofficedigital/workflow-web-modeler:$${DRONE_COMMIT_SHA}
     when:
       branch: master
       event: push

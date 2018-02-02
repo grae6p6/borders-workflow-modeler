@@ -7,14 +7,14 @@ metadata:
     stable.k8s.psg.io/kcm.provider: http
   labels:
     stable.k8s.psg.io/kcm.class: default
-  name: workflow-web-modeler
+  name: borders-workflow-modeler
 spec:
   rules:
    - host: {{ .DNS_NAME }}
      http:
       paths:
       - backend:
-          serviceName: workflow-web-modeler
+          serviceName: borders-workflow-modeler
           servicePort: https
         path: /
   tls:

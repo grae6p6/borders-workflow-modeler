@@ -2,17 +2,17 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: workflow-web-modeler
+  name: borders-workflow-modeler
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        name: workflow-web-modeler
+        name: borders-workflow-modeler
     spec:
       containers:
       - name: workflow-web-modeler
-        image: docker.digital.homeoffice.gov.uk/ukhomeofficedigital/borders/workflow-web-modeler:$${DRONE_COMMIT_SHA}
+        image: quay.io/ukhomeofficedigital/borders-workflow-modeler:$${DRONE_COMMIT_SHA}
         ports:
           - name: http
             containerPort: 8080
