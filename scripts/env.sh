@@ -16,7 +16,7 @@ export USE_SELF_SIGNED_CERTS=false
 
 case "${DRONE_DEPLOY_TO}" in
   dev)
-    export DNS_NAME="modeler-dev.notprod.bfarch.homeoffice.gov.uk"
+    export DNS_NAME="workflow-modeler-dev.notprod.bfarch.homeoffice.gov.uk"
     export KEYCLOAK_REPLICAS="2"
     export KUBE_CPU_LIMIT="800m"
     export KUBE_MEMORY_LIMIT="3072Mi"
