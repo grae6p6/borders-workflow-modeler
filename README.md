@@ -29,8 +29,8 @@ Navigate to http://localhost:8080
 
 ## To run docker image:
 ```
-docker build -t workflow-web-modeler .
-docker run -p 8080:8080 workflow-web-modeler:latest
+docker build -t borders-workflow-modeler .
+docker run -p 8080:8080 borders-workflow-modeler:latest
 
 ```
  

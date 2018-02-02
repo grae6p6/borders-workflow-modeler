@@ -4,7 +4,7 @@ pipeline:
     environment:
       - DOCKER_HOST=tcp://172.17.0.1:2375
     commands:
-      - docker build -t workflow-web-modeler .
+      - docker build -t borders-workflow-modeler .
     when:
       branch: master
       event: push
@@ -17,8 +17,8 @@ pipeline:
       - DOCKER_HOST=tcp://172.17.0.1:2375
     commands:
       - docker login -u="ukhomeofficedigital+borders_central" -p=$${DOCKER_PASSWORD} quay.io
-      - docker tag workflow-web-modeler quay.io/ukhomeofficedigital/workflow-web-modeler:$${DRONE_COMMIT_SHA}
-      - docker push quay.io/ukhomeofficedigital/workflow-web-modeler:$${DRONE_COMMIT_SHA}
+      - docker tag borders-workflow-modeler quay.io/ukhomeofficedigital/borders-workflow-modeler:$${DRONE_COMMIT_SHA}
+      - docker push quay.io/ukhomeofficedigital/borders-workflow-modeler:$${DRONE_COMMIT_SHA}
     when:
       branch: master
       event: push

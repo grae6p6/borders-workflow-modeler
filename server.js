@@ -8,7 +8,7 @@ if (process.env.NODE_ENV === 'production') {
     const app = express();
     const path = require('path');
 
-    process.title = 'workflow-web-modeler';
+    process.title = 'borders-workflow-modeler';
 
     app.set('port', port);
 

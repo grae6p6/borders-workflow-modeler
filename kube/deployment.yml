@@ -11,7 +11,7 @@ spec:
         name: borders-workflow-modeler
     spec:
       containers:
-      - name: workflow-web-modeler
+      - name: borders-workflow-modeler
         image: quay.io/ukhomeofficedigital/borders-workflow-modeler:$${DRONE_COMMIT_SHA}
         ports:
           - name: http
