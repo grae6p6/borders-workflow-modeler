@@ -20,4 +20,4 @@ spec:
   tls:
   - hosts:
     - {{ .DNS_NAME }}
-    secretName: tls
+    secretName: tls-borders-workflow-modeler

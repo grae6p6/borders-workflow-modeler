@@ -1,13 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
+  name: borders-workflow-modeler
   labels:
     name: borders-workflow-modeler
-  name: borders-workflow-modeler
 spec:
+  type: ClusterIP
   ports:
   - name: https
     port: 443
-    targetPort: https
+    targetPort: 443
   selector:
     name: borders-workflow-modeler
