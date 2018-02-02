@@ -1,0 +1,22 @@
+{
+  "presets": [
+    [
+      "env"
+    ],
+    "react"
+  ],
+  "plugins": [
+    [
+      "transform-class-properties",
+      "transform-object-rest-spread",
+      "add-module-exports",
+      "transform-imports",
+      {
+        "react-router-dom": {
+          "transform": "react-router-dom/es/${member}",
+          "preventFullImport": true
+        }
+      }
+    ]
+  ]
+}

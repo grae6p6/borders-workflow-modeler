@@ -1,0 +1,33 @@
+pipeline:
+  web-modeler-build:
+    image: docker:17.09.1
+    environment:
+      - DOCKER_HOST=tcp://172.17.0.1:2375
+    commands:
+      - docker build -t workflow-web-modeler .
+    when:
+      branch: master
+      event: push
+
+  image_to_artifactory:
+    image: docker:17.09.1
+    secrets:
+      - docker_artifactory_password
+    environment:
+      - DOCKER_HOST=tcp://172.17.0.1:2375
+    commands:
+      - docker login -u="borders-artifactory" -p=$${DOCKER_ARTIFACTORY_PASSWORD} docker.digital.homeoffice.gov.uk
+      - docker tag workflow-web-modeler docker.digital.homeoffice.gov.uk/ukhomeofficedigital/borders/workflow-web-modeler:$${DRONE_COMMIT_SHA}
+      - docker push docker.digital.homeoffice.gov.uk/ukhomeofficedigital/borders/workflow-web-modeler:$${DRONE_COMMIT_SHA}
+    when:
+      branch: master
+      event: push
+
+  deploy_to_dev:
+    image: quay.io/ukhomeofficedigital/kd:latest
+    commands:
+       - scripts/deploy.sh
+    secrets:
+      - kube_token_dev
+    when:
+      event: deployment
