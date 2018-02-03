@@ -1,34 +1,132 @@
----
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: borders-workflow-modeler
 spec:
-  replicas: {{ .MODELER_REPLICAS }}
+  replicas: {{ .KEYCLOAK_REPLICAS }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
   template:
     metadata:
       labels:
         name: borders-workflow-modeler
+      annotations:
+        owner: "amin.mohammed-coleman@digital.homeoffice.gov.uk"
     spec:
+      securityContext:
+        fsGroup: 1000
       containers:
-      - name: borders-workflow-modeler
-        image: quay.io/ukhomeofficedigital/borders-workflow-modeler:$${DRONE_COMMIT_SHA}
-        ports:
-          - name: http
-            containerPort: 8080
-      - name: proxy
-        image: quay.io/ukhomeofficedigital/nginx-proxy
+      {{- if eq .USE_CFSSL "true" }}
+      - name: certs
+        image: quay.io/ukhomeofficedigital/cfssl-sidekick:v0.0.2
         securityContext:
           runAsNonRoot: true
+        args:
+        - --certs=/certs
+        - --domain=borders-workflow-modeler.${KUBE_NAMESPACE}.svc.cluster.local
+        - --expiry=8760h
         env:
-          - name: PROXY_SERVICE_HOST
-            value: 'http://127.0.0.1'
-          - name: PROXY_SERVICE_PORT
-            value: '8080'
-          - name: LOG_FORMAT_NAME
-            value: 'json'
-          - name: NAXSI_USE_DEFAULT_RULES
-            value: 'FALSE'
+        - name: KUBE_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        volumeMounts:
+        - name: certs
+          mountPath: /certs
+        - name: bundle
+          mountPath: /etc/ssl/certs
+          readOnly: true
+      {{- end }}
+      - name: nginx
+        image: quay.io/ukhomeofficedigital/nginx-proxy:v3.2.0
+        securityContext:
+          runAsNonRoot: true
+        resources:
+          limits:
+            cpu: 300m
+            memory: 128Mi
+        env:
+        {{- if eq .USE_PROXY_PROTOCOL "true" }}
+        - name: LOAD_BALANCER_CIDR
+          value: 10.0.0.0/8
+        {{- end }}
+        - name: PROXY_SERVICE_HOST
+          value: 127.0.0.1
+        - name: PROXY_SERVICE_PORT
+          value: "8080"
+        {{- if eq .USE_CFSSL "false" }}
+        - name: SERVER_CERT
+          value: /etc/borders-workflow-modeler/certs/platform.pem
+        - name: SERVER_KEY
+          value: /etc/borders-workflow-modeler/certs/platform-key.pem
+        {{- end }}
+        {{- if eq .USE_CFSSL "true" }}
+        - name: SERVER_CERT
+          value: /certs/tls.pem
+        - name: SERVER_KEY
+          value: /certs/tls-key.pem
+        {{- end }}
+        - name: SSL_CIPHERS
+          value: ECDHE-RSA-AES128-GCM-SHA256:AES256+EECDH:AES256+EDH:!aNULL
+        - name: ENABLE_UUID_PARAM
+          value: "FALSE"
+        - name: NAXSI_USE_DEFAULT_RULES
+          value: "FALSE"
+        - name: PORT_IN_HOST_HEADER
+          value: "FALSE"
+        - name: ERROR_REDIRECT_CODES
+          value: "599"
+        - name: ADD_NGINX_SERVER_CFG
+          value: |
+            large_client_header_buffers 4 32k;
+        - name: ADD_NGINX_LOCATION_CFG
+          value: |
+            proxy_buffer_size         128k;
+            proxy_buffers             4 256k;
+            proxy_busy_buffers_size   256k;
         ports:
-          - name: https
-            containerPort: 10443
+        - name: http
+          containerPort: 10080
+        - name: https
+          containerPort: 10443
+        volumeMounts:
+        {{- if eq .USE_CFSSL "false" }}
+        - name: certs
+          mountPath: /etc/borders-workflow-modeler/certs
+          readOnly: true
+        {{- end }}
+        {{- if eq .USE_CFSSL "true" }}
+        - name: certs
+          mountPath: /certs
+          readOnly: true
+        {{- end }}
+      - name: borders-workflow-modeler
+        image: quay.io/ukhomeofficedigital/borders-workflow-modeler:$${DRONE_COMMIT_SHA}
+        securityContext:
+          runAsNonRoot: true
+        resources:
+          limits:
+            cpu: {{ .KUBE_CPU_LIMIT }}
+            memory: {{ .KUBE_MEMORY_LIMIT }}
+        args:
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+            scheme: HTTP
+              volumes:
+      {{ if eq .USE_CFSSL "false" }}
+      - name: certs
+        secret:
+          secretName: certs
+      {{- end }}
+      {{- if eq .USE_CFSSL "true" }}
+      - name: bundle
+        configMap:
+          name: bundle
+      - name: certs
+        emptyDir: {}
+      {{- end }}
+
