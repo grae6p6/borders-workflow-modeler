@@ -58,9 +58,9 @@ spec:
           value: "8080"
         {{- if eq .USE_CFSSL "false" }}
         - name: SERVER_CERT
-          value: /etc/borders-workflow-modeler/certs/platform.pem
+          value: /etc/modeler/certs/platform.pem
         - name: SERVER_KEY
-          value: /etc/borders-workflow-modeler/certs/platform-key.pem
+          value: /etc/modeler/certs/platform-key.pem
         {{- end }}
         {{- if eq .USE_CFSSL "true" }}
         - name: SERVER_CERT
@@ -94,7 +94,7 @@ spec:
         volumeMounts:
         {{- if eq .USE_CFSSL "false" }}
         - name: certs
-          mountPath: /etc/borders-workflow-modeler/certs
+          mountPath: /etc/modeler/certs
           readOnly: true
         {{- end }}
         {{- if eq .USE_CFSSL "true" }}
@@ -104,19 +104,19 @@ spec:
         {{- end }}
       - name: borders-workflow-modeler
         image: quay.io/ukhomeofficedigital/borders-workflow-modeler:$${DRONE_COMMIT_SHA}
+        imagePullPolicy: Always
         securityContext:
           runAsNonRoot: true
         resources:
           limits:
             cpu: {{ .KUBE_CPU_LIMIT }}
             memory: {{ .KUBE_MEMORY_LIMIT }}
-        args:
         readinessProbe:
           httpGet:
             path: /
             port: 8080
             scheme: HTTP
-              volumes:
+      volumes:
       {{ if eq .USE_CFSSL "false" }}
       - name: certs
         secret:
