@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: borders-workflow-modeler
 spec:
-  replicas: 1
+  replicas: {{ .MODELER_REPLICAS }}
   template:
     metadata:
       labels:
