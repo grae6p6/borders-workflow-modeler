@@ -103,7 +103,7 @@ spec:
           readOnly: true
         {{- end }}
       - name: borders-workflow-modeler
-        image: quay.io/ukhomeofficedigital/borders-workflow-modeler:$${DRONE_COMMIT_SHA}
+        image: quay.io/ukhomeofficedigital/borders-workflow-modeler:a0c01bfcc58285216cb6125180693e8af0e71a1a
         imagePullPolicy: Always
         securityContext:
           runAsNonRoot: true
