@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: borders-workflow-modeler
 spec:
-  replicas: {{ .KEYCLOAK_REPLICAS }}
+  replicas: {{ .MODELER_REPLICAS }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
