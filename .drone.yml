@@ -20,6 +20,7 @@ pipeline:
       - docker tag borders-workflow-modeler quay.io/ukhomeofficedigital/borders-workflow-modeler:$${DRONE_COMMIT_SHA}
       - docker tag borders-workflow-modeler quay.io/ukhomeofficedigital/borders-workflow-modeler:latest
       - docker push quay.io/ukhomeofficedigital/borders-workflow-modeler:$${DRONE_COMMIT_SHA}
+      - docker push quay.io/ukhomeofficedigital/borders-workflow-modeler:latest
     when:
       branch: master
       event: push
