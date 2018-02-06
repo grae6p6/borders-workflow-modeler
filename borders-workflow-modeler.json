@@ -1,0 +1,18 @@
+{
+  "family": "borders-workflow",
+  "containerDefinitions": [
+    {
+      "name": "borders-workflow-modeler",
+      "image": "quay.io/ukhomeofficedigital/borders-workflow-modeler:latest",
+      "cpu": 128,
+      "memoryReservation": 128,
+      "portMappings": [
+        {
+          "containerPort": 8080,
+          "protocol": "tcp"
+        }
+      ],
+      "essential": true
+    }
+  ]
+}
