@@ -8,11 +8,18 @@ if (process.env.NODE_ENV === 'production') {
     const app = express();
     const path = require('path');
 
+    const respond = (req, res) => {
+        res.send('OK');
+    };
+
     process.title = 'borders-workflow-modeler';
 
     app.set('port', port);
 
     app.use(express.static(__dirname + "/"));
+
+    app.get('/healthz', respond);
+    app.get('/readiness', respond);
 
     app.all('*', function(req, res) {
         res.sendFile(path.join(__dirname, 'index.html'));
