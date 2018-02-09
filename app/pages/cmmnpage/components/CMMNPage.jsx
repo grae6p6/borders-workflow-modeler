@@ -32,9 +32,8 @@ const newDiagramXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
 
 class CMMNPage extends React.Component{
 
-    constructor(){
-        super();
-        this.bpmnModeler = new Modeler();
+    componentWillMount() {
+        this.bpmnModeler = null;
         this.createNewDiagram = this.createNewDiagram.bind(this);
         this.openDiagram = this.openDiagram.bind(this);
         this.registerFileDrop = this.registerFileDrop.bind(this);
@@ -116,10 +115,23 @@ class CMMNPage extends React.Component{
     }
 
     componentDidMount() {
+
+        this.bpmnModeler = new Modeler({
+            propertiesPanel: {
+                parent: '#js-properties-panel'
+            },
+            additionalModules: [
+                require('cmmn-js-properties-panel'),
+                require('cmmn-js-properties-panel/lib/provider/cmmn'),
+            ],
+            moddleExtensions: {
+                camunda: require('camunda-cmmn-moddle/resources/camunda')
+            },
+        });
+
         this.bpmnModeler.attachTo("#js-canvas");
         this.container = $('#js-drop-zone');
-        this.registerFileDrop(this.container, this.openDiagram)
-
+        this.registerFileDrop(this.container, this.openDiagram);
 
         const downloadLink = $('#js-download-diagram');
         const downloadSvgLink = $('#js-download-svg');

@@ -2,15 +2,11 @@ import React from 'react'
 import Modeler from 'bpmn-js/dist/bpmn-modeler.production.min';
 import debounce from 'lodash/debounce'
 
-import PropertiesPanel from 'bpmn-js-properties-panel/lib/PropertiesPanel'
-import CamundaPropertiesProvider from 'bpmn-js-properties-panel/lib/provider/camunda/CamundaPropertiesProvider'
-import tokenSimulation from 'bpmn-js-token-simulation/lib/modeler'
-import camundaModdleDescriptor from 'camunda-bpmn-moddle/resources/camunda';
-
 import 'bpmn-js-token-simulation/assets/css/bpmn-js-token-simulation.css'
 import 'bpmn-js-token-simulation/assets/css/font-awesome.min.css'
 import "bpmn-js/assets/bpmn-font/css/bpmn-embedded.css";
 import "diagram-js/assets/diagram-js.css";
+
 
 const newDiagramXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
     "<bpmn2:definitions xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:bpmn2=\"http://www.omg.org/spec/BPMN/20100524/MODEL\" xmlns:bpmndi=\"http://www.omg.org/spec/BPMN/20100524/DI\" xmlns:dc=\"http://www.omg.org/spec/DD/20100524/DC\" xmlns:di=\"http://www.omg.org/spec/DD/20100524/DI\" xsi:schemaLocation=\"http://www.omg.org/spec/BPMN/20100524/MODEL BPMN20.xsd\" id=\"sample-diagram\" targetNamespace=\"http://bpmn.io/schema/bpmn\">\n" +
@@ -27,39 +23,24 @@ const newDiagramXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
     "</bpmn2:definitions>";
 
 
-class BPMNPage extends React.Component{
+class BPMNPage extends React.Component {
 
-    constructor(){
-        super();
-        this.bpmnModeler = new Modeler({
-            keyboard: { bindTo: document },
-            propertiesPanel: {
-                parent: '#js-properties-panel'
-            },
-            additionalModules: [
-                PropertiesPanel,
-                CamundaPropertiesProvider,
-                tokenSimulation
-
-            ],
-            moddleExtensions: {
-                camunda: camundaModdleDescriptor
-            },
-        });
+    componentWillMount() {
+        this.bpmnModeler = null;
         this.createNewDiagram = this.createNewDiagram.bind(this);
         this.openDiagram = this.openDiagram.bind(this);
         this.registerFileDrop = this.registerFileDrop.bind(this);
-        this.saveSVG= this.saveSVG.bind(this);
+        this.saveSVG = this.saveSVG.bind(this);
         this.saveDiagram = this.saveDiagram.bind(this);
     }
 
 
-    saveSVG (done)  {
+    saveSVG(done) {
         this.bpmnModeler.saveSVG(done);
     };
 
     saveDiagram(done) {
-        this.bpmnModeler.saveXML({ format: true }, function(err, xml) {
+        this.bpmnModeler.saveXML({format: true}, function (err, xml) {
             done(err, xml);
         });
     };
@@ -81,9 +62,10 @@ class BPMNPage extends React.Component{
         event.preventDefault();
         this.openDiagram(newDiagramXML);
     }
+
     openDiagram(xml) {
         const that = this;
-        this.bpmnModeler.importXML(xml, function(err) {
+        this.bpmnModeler.importXML(xml, function (err) {
             if (err) {
                 container
                     .removeClass('with-diagram')
@@ -127,6 +109,20 @@ class BPMNPage extends React.Component{
     }
 
     componentDidMount() {
+        this.bpmnModeler = new Modeler({
+            keyboard: {bindTo: document},
+            propertiesPanel: {
+                parent: '#js-properties-panel'
+            },
+            additionalModules: [
+                require('bpmn-js-properties-panel'),
+                require('bpmn-js-properties-panel/lib/provider/bpmn'),
+                require('bpmn-js-token-simulation/lib/modeler')
+            ],
+            moddleExtensions: {
+                camunda: require('camunda-bpmn-moddle/resources/camunda')
+            },
+        });
         this.bpmnModeler.attachTo("#js-canvas");
 
         this.container = $('#js-drop-zone');
@@ -150,18 +146,22 @@ class BPMNPage extends React.Component{
         eventBus.on('tokenSimulation.toggleMode', (e) => {
             if (e.simulationModeActive) {
                 $('#downloadButtons').hide();
+                $('#js-properties-panel').hide();
             } else {
                 $('#downloadButtons').show();
+                $('#js-properties-panel').show();
             }
         })
     }
 
-    render(){
-        return <div >
-            <div className="content" name="js-drop-zone" id="js-drop-zone" style={{ height: '90%', position: 'absolute'}}>
+    render() {
+        return <div>
+            <div className="content" name="js-drop-zone" id="js-drop-zone"
+                 style={{height: '90%', position: 'absolute'}}>
                 <div className="message intro">
                     <div className="note">
-                        Drop BPMN diagram from your desktop or <a href="#" onClick={this.createNewDiagram} >create a new diagram</a> to get
+                        Drop BPMN diagram from your desktop or <a href="#" onClick={this.createNewDiagram}>create a new
+                        diagram</a> to get
                         started.
                     </div>
                 </div>
@@ -175,8 +175,10 @@ class BPMNPage extends React.Component{
                         </div>
                     </div>
                 </div>
-                <div className="canvas" id="js-canvas" />
+
+                <div className="canvas" id="js-canvas"/>
                 <div id="js-properties-panel" />
+
             </div>
             <ul className="buttons" id="downloadButtons">
                 <li>

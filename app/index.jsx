@@ -10,6 +10,7 @@ import configureStore from './core/store/configureStore';
 import "../public/styles/govuk-template.css";
 import "../public/styles/fonts.css";
 import '../public/styles/app.css'
+import '../public/styles/app.less';
 
 const store = configureStore();
 
