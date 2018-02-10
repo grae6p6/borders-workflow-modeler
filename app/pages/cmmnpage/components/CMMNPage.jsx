@@ -67,6 +67,7 @@ class CMMNPage extends React.Component{
     createNewDiagram(event) {
         event.stopPropagation();
         event.preventDefault();
+        $('#js-properties-panel').show();
         this.openDiagram(newDiagramXML);
     }
     openDiagram(xml) {
@@ -79,6 +80,7 @@ class CMMNPage extends React.Component{
                 that.container.find('.error pre').text(err.message);
                 console.error(err);
             } else {
+                $('#js-properties-panel').show();
                 that.bpmnModeler.get('canvas').zoom('fit-viewport');
                 that.container
                     .removeClass('with-error')
@@ -115,7 +117,7 @@ class CMMNPage extends React.Component{
     }
 
     componentDidMount() {
-
+        $('#js-properties-panel').hide();
         this.bpmnModeler = new Modeler({
             propertiesPanel: {
                 parent: '#js-properties-panel'

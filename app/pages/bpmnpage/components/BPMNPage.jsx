@@ -60,6 +60,7 @@ class BPMNPage extends React.Component {
     createNewDiagram(event) {
         event.stopPropagation();
         event.preventDefault();
+        $('#js-properties-panel').show();
         this.openDiagram(newDiagramXML);
     }
 
@@ -73,6 +74,7 @@ class BPMNPage extends React.Component {
                 that.container.find('.error pre').text(err.message);
                 console.error(err);
             } else {
+                $('#js-properties-panel').show();
                 that.bpmnModeler.get('canvas').zoom('fit-viewport');
                 that.container
                     .removeClass('with-error')
@@ -101,7 +103,7 @@ class BPMNPage extends React.Component {
         const handleDragOver = (e) => {
             e.stopPropagation();
             e.preventDefault();
-            e.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+            e.dataTransfer.dropEffect = 'copy';
         };
 
         container.get(0).addEventListener('dragover', handleDragOver, false);
@@ -109,6 +111,7 @@ class BPMNPage extends React.Component {
     }
 
     componentDidMount() {
+        $('#js-properties-panel').hide();
         this.bpmnModeler = new Modeler({
             keyboard: {bindTo: document},
             propertiesPanel: {

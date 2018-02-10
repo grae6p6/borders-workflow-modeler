@@ -3,7 +3,7 @@ import React from "react";
 class DMNPage extends React.Component {
 
     render() {
-        return <div>
+        return <div className="center">
             Not yet implemented.
         </div>
     }

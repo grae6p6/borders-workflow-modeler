@@ -23,12 +23,12 @@ const Header = (props) => {
                             <a id="proposition-name" onClick={() => props.history.replace('home')}>Process
                                 Modeler</a>
                             <ul id="proposition-links">
-                                <li><a onClick={() => props.history.replace('bpmn')}
-                                       className={currentRoute === '/bpmn' ? 'active' : ''}>BPMN</a></li>
-                                <li><a onClick={() => props.history.replace('cmmn')}
-                                       className={currentRoute === '/cmmn' ? 'active' : ''}>CMMN</a></li>
-                                <li><a onClick={() => props.history.replace('dmn')}
-                                       className={currentRoute === '/dmn' ? 'active' : ''}>DMN</a></li>
+                                <li style={{ cursor: 'pointer'}}><a onClick={() => props.history.replace('bpmn')}
+                                                                    className={currentRoute === '/bpmn' ? 'active' : ''}>BPMN</a></li>
+                                <li style={{ cursor: 'pointer'}}><a onClick={() => props.history.replace('cmmn')}
+                                                                    className={currentRoute === '/cmmn' ? 'active' : ''}>CMMN</a></li>
+                                <li style={{ cursor: 'pointer'}}><a onClick={() => props.history.replace('dmn')}
+                                                                    className={currentRoute === '/dmn' ? 'active' : ''}>DMN</a></li>
                             </ul>
                         </nav>
                     </div>
