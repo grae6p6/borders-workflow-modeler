@@ -74,7 +74,7 @@ class CMMNPage extends React.Component{
         const that = this;
         this.bpmnModeler.importXML(xml, function(err) {
             if (err) {
-                container
+                that.container
                     .removeClass('with-diagram')
                     .addClass('with-error');
                 that.container.find('.error pre').text(err.message);
@@ -165,7 +165,7 @@ class CMMNPage extends React.Component{
                         <p>Ooops, we could not display the CMMN diagram.</p>
 
                         <div className="details">
-                            <span>cause of the problem</span>
+                            <span>Cause of the problem:</span>
                             <pre></pre>
                         </div>
                     </div>
