@@ -25,6 +25,21 @@ const newDiagramXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
 
 class BPMNPage extends React.Component {
 
+    constructor(props) {
+        super(props);
+        this.state = {
+            error: '', propertiesPanel: false,
+            downloadButtons: true,
+            containerClass: 'content',
+            bpmnLink: {
+                linkClass: '', linkHref: '#'
+            },
+            svgLink: {
+                linkClass: '', linkHref: '#'
+            }
+        }
+    }
+
     componentWillMount() {
         this.bpmnModeler = null;
         this.createNewDiagram = this.createNewDiagram.bind(this);
@@ -40,27 +55,55 @@ class BPMNPage extends React.Component {
     };
 
     saveDiagram(done) {
-        this.bpmnModeler.saveXML({format: true}, function (err, xml) {
+        this.bpmnModeler.saveXML({format: true}, (err, xml) => {
             done(err, xml);
         });
     };
 
-    setEncoded(link, name, data) {
+    setBPMNEncoded(data) {
         const encodedData = encodeURIComponent(data);
         if (data) {
-            link.addClass('active').attr({
-                'href': 'data:application/bpmn20-xml;charset=UTF-8,' + encodedData,
-                'download': name
+            this.setState({
+                bpmnLink: {
+                    linkClass: 'active',
+                    linkHref: 'data:application/bpmn20-xml;charset=UTF-8,' + encodedData,
+                }
             });
+
         } else {
-            link.removeClass('active');
+            this.setState({
+                bpmnLink: {
+                    linkClass: '',
+                    linkHref: '#',
+                }
+            });
+        }
+    }
+
+    setSVGEncoded(data) {
+        const encodedData = encodeURIComponent(data);
+        if (data) {
+            this.setState({
+                svgLink: {
+                    linkClass: 'active',
+                    linkHref: 'data:application/bpmn20-xml;charset=UTF-8,' + encodedData,
+                }
+            });
+
+        } else {
+            this.setState({
+                svgLink: {
+                    linkClass: '',
+                    linkHref: '#',
+                }
+            });
         }
     }
 
     createNewDiagram(event) {
         event.stopPropagation();
         event.preventDefault();
-        $('#js-properties-panel').show();
+        this.setState({propertiesPanel: true});
         this.openDiagram(newDiagramXML);
     }
 
@@ -68,17 +111,10 @@ class BPMNPage extends React.Component {
         const that = this;
         this.bpmnModeler.importXML(xml, function (err) {
             if (err) {
-                that.container
-                    .removeClass('with-diagram')
-                    .addClass('with-error');
-                that.container.find('.error pre').text(err.message);
-                console.error(err);
+                that.setState({propertiesPanel: false, containerClass: 'content with-error', error: err.message});
             } else {
-                $('#js-properties-panel').show();
+                that.setState({propertiesPanel: true, containerClass: 'content with-diagram', error: ''});
                 that.bpmnModeler.get('canvas').zoom('fit-viewport');
-                that.container
-                    .removeClass('with-error')
-                    .addClass('with-diagram');
             }
         });
     }
@@ -111,7 +147,7 @@ class BPMNPage extends React.Component {
     }
 
     componentDidMount() {
-        $('#js-properties-panel').hide();
+        this.setState({propertiesPanel: false});
         this.bpmnModeler = new Modeler({
             keyboard: {bindTo: document},
             propertiesPanel: {
@@ -128,39 +164,38 @@ class BPMNPage extends React.Component {
         });
         this.bpmnModeler.attachTo("#js-canvas");
 
-        this.container = $('#js-drop-zone');
+        this.container = $(this.jsDropZone);
         this.registerFileDrop(this.container, this.openDiagram);
-
-        const downloadLink = $('#js-download-diagram');
-        const downloadSvgLink = $('#js-download-svg');
 
         const exportArtifacts = debounce(() => {
             this.saveSVG((err, svg) => {
-                this.setEncoded(downloadSvgLink, 'diagram.svg', err ? null : svg);
+                this.setSVGEncoded(err ? null : svg);
             });
 
             this.saveDiagram((err, xml) => {
-                this.setEncoded(downloadLink, 'diagram.bpmn', err ? null : xml);
+                this.setBPMNEncoded(err ? null : xml);
             });
         }, 500);
 
         this.bpmnModeler.on('commandStack.changed', exportArtifacts);
         const eventBus = this.bpmnModeler.get('eventBus');
+
         eventBus.on('tokenSimulation.toggleMode', (e) => {
             if (e.simulationModeActive) {
-                $('#downloadButtons').hide();
-                $('#js-properties-panel').hide();
+                this.setState({downloadButtons: false});
+                this.setState({propertiesPanel: false});
             } else {
-                $('#downloadButtons').show();
-                $('#js-properties-panel').show();
+                this.setState({downloadButtons: true});
+                this.setState({propertiesPanel: true});
             }
         })
     }
 
     render() {
+        const errorMessage = this.state.error;
         return <div>
-            <div className="content" name="js-drop-zone" id="js-drop-zone"
-                 style={{height: '90%', position: 'absolute'}}>
+            <div className={this.state.containerClass} name="js-drop-zone" id="js-drop-zone"
+                 style={{height: '90%', position: 'absolute'}} ref={jsDropZone => this.jsDropZone = jsDropZone}>
                 <div className="message intro">
                     <div className="note">
                         Drop BPMN diagram from your desktop or <a href="#" onClick={this.createNewDiagram}>create a new
@@ -174,26 +209,29 @@ class BPMNPage extends React.Component {
 
                         <div className="details">
                             <span>Cause of the problem:</span>
-                            <pre></pre>
+                            <pre>{errorMessage}</pre>
                         </div>
                     </div>
                 </div>
 
                 <div className="canvas" id="js-canvas"/>
-                <div id="js-properties-panel" />
-
+                <div id="js-properties-panel"
+                     style={this.state.propertiesPanel ? {'display': ''} : {'display': 'none'}}/>
             </div>
-            <ul className="buttons" id="downloadButtons">
+            <ul className="buttons" id="downloadButtons"
+                style={this.state.downloadButtons ? {'display': ''} : {'display': 'none'}}>
                 <li>
                     Download as:
                 </li>
                 <li>
-                    <a id="js-download-diagram" href="#" title="download BPMN diagram">
+                    <a id="js-download-diagram" href={this.state.bpmnLink.linkHref} className={this.state.bpmnLink.linkClass}
+                       download={'diagram.bpmn'} title="download BPMN diagram">
                         BPMN diagram
                     </a>
                 </li>
                 <li>
-                    <a id="js-download-svg" href="#" title="download as SVG image">
+                    <a id="js-download-svg" title="download as SVG image" href={this.state.svgLink.linkHref}
+                       className={this.state.svgLink.linkClass} download={'diagram.svg'}>
                         SVG image
                     </a>
                 </li>
