@@ -205,7 +205,7 @@ class BPMNPage extends React.Component {
                 </div>
                 <div className="message error">
                     <div className="note">
-                        <p>Ooops, we could not display the BPMN 2.0 diagram.</p>
+                        <p>We could not display the BPMN 2.0 diagram.</p>
 
                         <div className="details">
                             <span>Cause of the problem:</span>

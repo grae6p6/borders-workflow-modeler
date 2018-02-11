@@ -30,61 +30,98 @@ const newDiagramXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
     "  </cmmndi:CMMNDI>\n" +
     "</cmmn:definitions>";
 
-class CMMNPage extends React.Component{
+class CMMNPage extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            error: '', propertiesPanel: false,
+            downloadButtons: true,
+            containerClass: 'content',
+            cmmnLink: {
+                linkClass: '', linkHref: '#'
+            },
+            svgLink: {
+                linkClass: '', linkHref: '#'
+            }
+        }
+    }
 
     componentWillMount() {
         this.bpmnModeler = null;
         this.createNewDiagram = this.createNewDiagram.bind(this);
         this.openDiagram = this.openDiagram.bind(this);
         this.registerFileDrop = this.registerFileDrop.bind(this);
-        this.saveSVG= this.saveSVG.bind(this);
+        this.saveSVG = this.saveSVG.bind(this);
         this.saveDiagram = this.saveDiagram.bind(this);
     }
 
 
-    saveSVG(done){
+    saveSVG(done) {
         this.bpmnModeler.saveSVG(done);
     };
 
-    saveDiagram(done){
-        this.bpmnModeler.saveXML({ format: true }, function(err, xml) {
+    saveDiagram(done) {
+        this.bpmnModeler.saveXML({format: true}, (err, xml) => {
             done(err, xml);
         });
     };
 
-    setEncoded(link, name, data) {
+    setCMMNEncoded(data) {
         const encodedData = encodeURIComponent(data);
         if (data) {
-            link.addClass('active').attr({
-                'href': 'data:application/cmmn11-xml;charset=UTF-8,' + encodedData,
-                'download': name
+            this.setState({
+                cmmnLink: {
+                    linkClass: 'active',
+                    linkHref: 'data:application/cmmn11-xml;charset=UTF-8,' + encodedData,
+                }
             });
+
         } else {
-            link.removeClass('active');
+            this.setState({
+                cmmnLink: {
+                    linkClass: '',
+                    linkHref: '#',
+                }
+            });
+        }
+    }
+
+    setSVGEncoded(data) {
+        const encodedData = encodeURIComponent(data);
+        if (data) {
+            this.setState({
+                svgLink: {
+                    linkClass: 'active',
+                    linkHref: 'data:application/cmmn11-xml;charset=UTF-8,' + encodedData,
+                }
+            });
+
+        } else {
+            this.setState({
+                svgLink: {
+                    linkClass: '',
+                    linkHref: '#',
+                }
+            });
         }
     }
 
     createNewDiagram(event) {
         event.stopPropagation();
         event.preventDefault();
-        $('#js-properties-panel').show();
+        this.setState({propertiesPanel: true});
         this.openDiagram(newDiagramXML);
     }
+
     openDiagram(xml) {
         const that = this;
-        this.bpmnModeler.importXML(xml, function(err) {
+        this.bpmnModeler.importXML(xml, function (err) {
             if (err) {
-                that.container
-                    .removeClass('with-diagram')
-                    .addClass('with-error');
-                that.container.find('.error pre').text(err.message);
-                console.error(err);
+                that.setState({propertiesPanel: false, containerClass: 'content with-error', error: err.message});
             } else {
-                $('#js-properties-panel').show();
+                that.setState({propertiesPanel: true, containerClass: 'content with-diagram', error: ''});
                 that.bpmnModeler.get('canvas').zoom('fit-viewport');
-                that.container
-                    .removeClass('with-error')
-                    .addClass('with-diagram');
             }
         });
     }
@@ -109,7 +146,7 @@ class CMMNPage extends React.Component{
         const handleDragOver = (e) => {
             e.stopPropagation();
             e.preventDefault();
-            e.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+            e.dataTransfer.dropEffect = 'copy';
         };
 
         container.get(0).addEventListener('dragover', handleDragOver, false);
@@ -117,7 +154,7 @@ class CMMNPage extends React.Component{
     }
 
     componentDidMount() {
-        $('#js-properties-panel').hide();
+        this.setState({propertiesPanel: false});
         this.bpmnModeler = new Modeler({
             propertiesPanel: {
                 parent: '#js-properties-panel'
@@ -132,58 +169,64 @@ class CMMNPage extends React.Component{
         });
 
         this.bpmnModeler.attachTo("#js-canvas");
-        this.container = $('#js-drop-zone');
-        this.registerFileDrop(this.container, this.openDiagram);
 
-        const downloadLink = $('#js-download-diagram');
-        const downloadSvgLink = $('#js-download-svg');
+        this.container = $(this.jsDropZone);
+        this.registerFileDrop(this.container, this.openDiagram);
 
         const exportArtifacts = debounce(() => {
             this.saveSVG((err, svg) => {
-                this.setEncoded(downloadSvgLink, 'diagram.svg', err ? null : svg);
+                this.setSVGEncoded(err ? null : svg);
             });
 
             this.saveDiagram((err, xml) => {
-                this.setEncoded(downloadLink, 'diagram.cmmn', err ? null : xml);
+                this.setCMMNEncoded(err ? null : xml);
             });
         }, 500);
-        this.bpmnModeler.on('commandStack.changed', exportArtifacts);
 
+        this.bpmnModeler.on('commandStack.changed', exportArtifacts);
     }
 
-    render(){
-        return <div >
-            <div className="content" name="js-drop-zone" id="js-drop-zone" style={{ height: '90%', position: 'absolute'}}>
+    render() {
+        const errorMessage = this.state.error;
+        return <div>
+            <div className={this.state.containerClass} name="js-drop-zone" id="js-drop-zone"
+                 style={{height: '90%', position: 'absolute'}} ref={jsDropZone => this.jsDropZone = jsDropZone}>
                 <div className="message intro">
                     <div className="note">
-                        Drop CMMN diagram from your desktop or <a href="#" onClick={this.createNewDiagram} >create a new diagram</a> to get
+                        Drop CMMN diagram from your desktop or <a href="#" onClick={this.createNewDiagram}>create a new
+                        diagram</a> to get
                         started.
                     </div>
                 </div>
                 <div className="message error">
                     <div className="note">
-                        <p>Ooops, we could not display the CMMN diagram.</p>
+                        <p>We could not display the CMMN diagram.</p>
 
                         <div className="details">
                             <span>Cause of the problem:</span>
-                            <pre></pre>
+                            <pre>{errorMessage}</pre>
                         </div>
                     </div>
                 </div>
-                <div className="canvas" id="js-canvas" />
-                <div id="js-properties-panel" />
+
+                <div className="canvas" id="js-canvas"/>
+                <div id="js-properties-panel"
+                     style={this.state.propertiesPanel ? {'display': ''} : {'display': 'none'}}/>
             </div>
-            <ul className="buttons">
+            <ul className="buttons" id="downloadButtons"
+                style={this.state.downloadButtons ? {'display': ''} : {'display': 'none'}}>
                 <li>
                     Download as:
                 </li>
                 <li>
-                    <a id="js-download-diagram" href="#" title="download CMMN diagram">
+                    <a id="js-download-diagram" href={this.state.cmmnLink.linkHref} className={this.state.cmmnLink.linkClass}
+                       download={'diagram.cmmn'} title="download CMMN diagram">
                         CMMN diagram
                     </a>
                 </li>
                 <li>
-                    <a id="js-download-svg" href="#" title="download as SVG image">
+                    <a id="js-download-svg" title="download as SVG image" href={this.state.svgLink.linkHref}
+                       className={this.state.svgLink.linkClass} download={'diagram.svg'}>
                         SVG image
                     </a>
                 </li>

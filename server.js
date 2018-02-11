@@ -25,22 +25,37 @@ if (process.env.NODE_ENV === 'production') {
         res.sendFile(path.join(__dirname, 'index.html'));
     });
 
-    http.createServer(app).listen(app.get('port'), function() {
+    const server = http.createServer(app).listen(app.get('port'), function() {
         console.log('Prod server listening on port ' + app.get('port'));
     });
 
-    const closeGracefully = (signal) => {
+    process.on('SIGTERM', shutDown);
+    process.on('SIGINT', shutDown);
+    process.on('SIGQUIT', shutDown);
+
+    let connections = [];
+
+    server.on('connection', connection => {
+        connections.push(connection);
+        connection.on('close', () => connections = connections.filter(curr => curr !== connection));
+    });
+
+    function shutDown() {
+        console.log('Received kill signal, shutting down gracefully');
+        server.close(() => {
+            console.log('Closed out remaining connections');
+            process.exit(0);
+        });
+
         setTimeout(() => {
-            logger.warn('Forcefully shutting down from sig:', signal);
-            process.exit(0); // eslint-disable-line no-process-exit
-        }, 500);
+            console.error('Could not close connections in time, forcefully shutting down');
+            process.exit(1);
+        }, 10000);
 
-        server.close(() => process.exit(0)); // eslint-disable-line no-process-exit
-    };
+        connections.forEach(curr => curr.end());
+        setTimeout(() => connections.forEach(curr => curr.destroy()), 5000);
+    }
 
-    ['SIGINT', 'SIGTERM', 'SIGQUIT'].forEach(signal =>
-        process.on(signal, () => closeGracefully(signal))
-    );
 
 } else {
     const webpack = require('webpack');
