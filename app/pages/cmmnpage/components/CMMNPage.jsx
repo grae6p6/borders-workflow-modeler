@@ -36,7 +36,6 @@ class CMMNPage extends React.Component {
         super(props);
         this.state = {
             error: '', propertiesPanel: false,
-            downloadButtons: true,
             containerClass: 'content',
             cmmnLink: {
                 linkClass: '', linkHref: '#'
@@ -211,10 +210,9 @@ class CMMNPage extends React.Component {
 
                 <div className="canvas" id="js-canvas"/>
                 <div id="js-properties-panel"
-                     style={this.state.propertiesPanel ? {'display': ''} : {'display': 'none'}}/>
+                     style={{'display': this.state.propertiesPanel ? '' : 'none'}}/>
             </div>
-            <ul className="buttons" id="downloadButtons"
-                style={this.state.downloadButtons ? {'display': ''} : {'display': 'none'}}>
+            <ul className="buttons" id="downloadButtons">
                 <li>
                     Download as:
                 </li>

@@ -216,15 +216,16 @@ class BPMNPage extends React.Component {
 
                 <div className="canvas" id="js-canvas"/>
                 <div id="js-properties-panel"
-                     style={this.state.propertiesPanel ? {'display': ''} : {'display': 'none'}}/>
+                     style={{'display': this.state.propertiesPanel ? '' : 'none'}}/>
             </div>
             <ul className="buttons" id="downloadButtons"
-                style={this.state.downloadButtons ? {'display': ''} : {'display': 'none'}}>
+                style={{'display': this.state.downloadButtons ? '' : 'none'}}>
                 <li>
                     Download as:
                 </li>
                 <li>
-                    <a id="js-download-diagram" href={this.state.bpmnLink.linkHref} className={this.state.bpmnLink.linkClass}
+                    <a id="js-download-diagram" href={this.state.bpmnLink.linkHref}
+                       className={this.state.bpmnLink.linkClass}
                        download={'diagram.bpmn'} title="download BPMN diagram">
                         BPMN diagram
                     </a>
