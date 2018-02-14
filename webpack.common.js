@@ -5,7 +5,7 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 const sourcePath = path.join(__dirname, './app');
 const buildDirectory = path.join(__dirname, './dist');
-
+const SriPlugin = require('webpack-subresource-integrity');
 
 module.exports = {
     resolve: {
@@ -16,8 +16,13 @@ module.exports = {
         path: buildDirectory,
         filename: 'bundle.js',
         publicPath: '/',
+        crossOriginLoading: 'anonymous',
     },
     plugins: [
+        new SriPlugin({
+            hashFuncNames: ['sha384'],
+            enabled: process.env.NODE_ENV === 'production',
+        }),
         new webpack.NamedModulesPlugin(),
         new HtmlWebpackPlugin({
             template: './public/index.html',
