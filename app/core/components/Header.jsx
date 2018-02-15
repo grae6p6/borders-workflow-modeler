@@ -12,7 +12,7 @@ const Header = (props) => {
                         <a href="https://www.gov.uk/government/organisations/home-office"
                            title="Go to the UK Home Office Homepage" id="logo" className="content">
                             <img src="/img/gov.uk_logotype_crown_invert_trans.png?0.23.0" width="36" height="32"
-                                 alt="Home Office Logo"/> OSCT DDT
+                                 alt="Gov.UK Logo"/> DDT
                         </a>
                     </div>
                 </div>
