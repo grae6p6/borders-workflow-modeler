@@ -9,10 +9,10 @@ const Header = (props) => {
             <div className="header-wrapper">
                 <div className="header-global">
                     <div className="header-logo">
-                        <a href="https://www.gov.uk/government/organisations/border-force"
-                           title="Go to the UK Border Force Homepage" id="logo" className="content">
+                        <a href="https://www.gov.uk/government/organisations/home-office"
+                           title="Go to the UK Home Office Homepage" id="logo" className="content">
                             <img src="/img/gov.uk_logotype_crown_invert_trans.png?0.23.0" width="36" height="32"
-                                 alt="UK Border Force Logo"/> UK Border Force
+                                 alt="Home Office Logo"/> OSCT DDT
                         </a>
                     </div>
                 </div>
